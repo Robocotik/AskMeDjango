@@ -16,16 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from app import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.index, name='index'),
-    path('login/', views.login, name='login'),
-    path('signup/', views.signup, name='signup'),
-    path('ask/', views.ask, name='ask'),
-    path('hot/', views.hot, name='hot'),
-    path('tag/', views.tag_id, name='tag'),
-    path('question/', views.question_id, name='question'),
-    path('settings/', views.settings, name='settings'),
+    path('', include('app.urls')),  # Подключаем маршруты вашего приложения
 ]

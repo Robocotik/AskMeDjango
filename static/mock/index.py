@@ -6,5 +6,6 @@ for i in range(4):  # Предположим, что нам нужно 4 эле�
         "desc": f"What {i}?",
         "answer_count": str(i * 5),  # Значение answer_count будет равным i * 5
         "tags": ['python', 'c++', 'c#', 'unity'],
+        "image_url":"./../static/img/porshe.jpg",
     }
     data["data"].append(item)
