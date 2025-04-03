@@ -1,8 +1,9 @@
 from django.shortcuts import render
-
+from static.mock.index import data
 # Create your views here.
 def index(request):
-    return render(request, 'index.html')
+    
+    return render(request, 'index.html', context=data)
 
 def settings(request):
     return render(request, 'settings.html')

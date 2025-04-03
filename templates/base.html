@@ -12,7 +12,8 @@
 <body class='lato-regular w-full flex flex-col justify-start items-center'>
     <header class='flex justify-center w-full py-2 h-20 bg-gray-300'>
         <div class='flex justify-between w-full max-w-[60rem] items-center'>
-            <div
+            <a
+                href='/'
                 class='flex gap-2 h-full items-center cursor-pointer text-black hover:text-black/60 duration-200 transition-all'>
                 <svg width="auto" height="100%" class='h-full aspect-square  text-inherit' viewBox="0 0 48 48"
                     xmlns="http://www.w3.org/2000/svg">
@@ -37,7 +38,7 @@
                     </g>
                 </svg>
                 <p>AskMe</p>
-            </div>
+            </a>
 
             <div class='flex gap-2'>
                 <input type="text" placeholder='Search' class='rounded-md ps-2 overflow-hidden'>
@@ -71,7 +72,7 @@
                                     </g>
                                 </g>
                             </svg>
-                            <a href="/" class='text-sm'>settings</a>
+                            <a href="/settings" class='text-sm'>settings</a>
                         </div>
                         <div
                             class='flex gap-1 h-full items-center cursor-pointer px-2 py-1 hover:shadow border border-1 border-gray-250 rounded-md duration-200 transition-all'>
@@ -102,7 +103,7 @@
             <div class='flex gap-4 w-full items-center justify-start  border-b-2 border-gray-300'>
                 {% block header %}
                 {% endblock header %}
-               
+
             </div>
             <div class='w-full flex justify-between gap-20'>
 
