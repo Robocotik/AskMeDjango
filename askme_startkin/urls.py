@@ -27,4 +27,5 @@ urlpatterns = [
     path('hot/', views.hot, name='hot'),
     path('tag/', views.tag_id, name='tag'),
     path('question/', views.question_id, name='question'),
+    path('settings/', views.settings, name='settings'),
 ]
