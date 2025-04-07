@@ -21,8 +21,8 @@ def hot(request):
 def ask(request):
     return render(request, 'ask.html')
 
-def question_id(request):
-    return render(request, 'question_id.html', context=questions)
+def single_question(request, question_id):
+    return render(request, 'single_question.html', context={"item": questions[question_id]})
 
 def tag_id(request):
     return render(request, 'tag_bender.html')
