@@ -1,10 +1,9 @@
 from django.shortcuts import render
-from static.mock.index import data
 from static.mock.question import questions
 # Create your views here.
 def index(request):
     
-    return render(request, 'index.html', context=data)
+    return render(request, 'index.html', context={"items" : questions})
 
 def settings(request):
     return render(request, 'settings.html',)
