@@ -7,17 +7,23 @@ class Profile(models.Model):
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
 
     def __str__(self) -> str:
-        return self.user
+        return self.user.username
     
 class QuestionManager(Manager):
     def new_questions(self):
         return self.order_by('-created_at')
     def best_questions(self):
-        # Здесь можно добавить логику для определения "лучших" вопросов
-        # Например, можно использовать количество лайков или комментариев
-        return self.order_by('-likes_count')  # Пример, если у вас есть поле likes_count
+        return self.order_by('-likes_count')
+    def questions_with_tag(self, tag_title):
+        try:
+            tag = Tag.objects.get(title=tag_title)
+        except Tag.DoesNotExist:
+            return self.none()
+        
+        return self.filter(tags=tag)
     
 class Question(models.Model):
+    objects = QuestionManager()
     title = models.CharField(max_length=255)
     author = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
     tags = models.ManyToManyField('Tag', related_name='questions')
@@ -56,4 +62,8 @@ class AnswerLike(models.Model):
 
 
 class Like(models.Model):
-    count = models.BigIntegerField(default=0)
+    id = models.AutoField(primary_key=True, editable=False)
+    author = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
+
+    def __str__(self) -> str:
+        return self.author.username
