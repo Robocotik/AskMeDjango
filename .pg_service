@@ -1,0 +1,5 @@
+[postgres]
+host=localhost
+user=postgres
+dbname=AskMe
+port=5432

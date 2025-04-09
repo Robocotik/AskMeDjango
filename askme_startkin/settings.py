@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'app',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -74,8 +75,19 @@ WSGI_APPLICATION = 'askme_startkin.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        "ENGINE": "django.db.backends.postgresql",
+        "OPTIONS": {
+            # "service": ".pg_service",
+            "passfile": ".my_pgpass",
+            "client_encoding": 'UTF8',
+            # "pool": True,
+        },
+        'NAME': 'AskMe',
+        'USER': 'postgres',
+        'PASSWORD': 'admin',
+        'HOST': 'localhost',  # или IP-адрес вашего сервера
+        'PORT': '5432',       # стандартный порт PostgreSQL
+        
     }
 }
 
