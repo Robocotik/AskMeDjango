@@ -6,7 +6,7 @@
 {% block content %}
 <div class='flex flex-col gap-4 w-full'>
     {% for item in items %}
-    {% include "card_layout.html" with question_id=item.question_id image_url=item.image_url like_count=item.like_count title=item.title desc=item.desc answer_count=item.answer_count tags=item.tags %}
+    {% include "card_layout.html" with id=item.id image_url=item.image_url like_count=item.like_count title=item.title desc=item.desc answer_count=item.answer_count tags=item.tags.all %}
     {% endfor %}
 </div>
 {% endblock content %}

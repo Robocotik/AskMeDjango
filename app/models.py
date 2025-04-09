@@ -22,9 +22,13 @@ class QuestionManager(Manager):
         
         return self.filter(tags=tag)
     
+
+    
 class Question(models.Model):
+    id = models.BigAutoField(primary_key=True, editable=False)
     objects = QuestionManager()
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=1000, default='title_placeholder')
+    desc  = models.CharField(max_length=20000, default='desc_placeholder')
     author = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     tags = models.ManyToManyField('Tag', related_name='questions')
     created_at = models.DateTimeField(auto_now_add=True)
