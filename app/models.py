@@ -33,7 +33,8 @@ class Question(models.Model):
     tags = models.ManyToManyField('Tag', related_name='questions')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
+    like_count = models.IntegerField(default=1)
+    
     def __str__(self) -> str:
         return self.title
 
