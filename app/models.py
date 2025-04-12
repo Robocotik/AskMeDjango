@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Manager
+from django.db.models import Count
+from django.core.exceptions import ObjectDoesNotExist
+
 class Profile(models.Model):
     id = models.BigAutoField(auto_created=True, primary_key=True, serialize=True)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -10,11 +13,22 @@ class Profile(models.Model):
         return self.user.username
     
 class QuestionManager(Manager):
+    # questions_with_answer_count = Question.objects.annotate(answer_count=Count('answers'))
+    def all_questions(self):
+        return self.annotate(answer_count=Count('answers'))
     def new_questions(self):
-        return self.order_by('-created_at')
+        return self.annotate(answer_count=Count('answers')).order_by('-created_at')
     def best_questions(self):
-        return self.order_by('-likes_count')
+        return self.annotate(answer_count=Count('answers')).order_by('-likes_count')
+    
+    def question_with_id(self, id):
+        try:
+            return self.prefetch_related('answers', 'tags').annotate(answer_count=Count('answers')).get(id=int(id))
+        except ObjectDoesNotExist:
+            return None
+        
     def questions_with_tag(self, tag_title):
+        self = self.annotate(answer_count=Count('answers'))
         try:
             tag = Tag.objects.get(title=tag_title)
         except Tag.DoesNotExist:
@@ -55,20 +69,12 @@ class Answer(models.Model):
         return self.question
     
 class QuestionLike(models.Model):
-    question = models.ForeignKey('Question', on_delete=models.CASCADE, related_name='likes', blank=True, null=True)
-    like = models.ForeignKey('Like', on_delete=models.CASCADE, blank=True, null=True)
+    question = models.ForeignKey('Question',default=None, on_delete=models.CASCADE, related_name='likes')
+    user = models.ForeignKey(User, default=None, on_delete=models.CASCADE)
     class Meta:
-        unique_together = ('like', 'question')  # Исправлено на 'like' и 'question'
+        unique_together = ('question', 'user')
 class AnswerLike(models.Model):
-    answer = models.ForeignKey('Answer', on_delete=models.CASCADE, related_name='likes', blank=True, null=True)
-    like = models.ForeignKey('Like', on_delete=models.CASCADE, blank=True, null=True)
+    answer = models.ForeignKey('Answer',default=None, on_delete=models.CASCADE, related_name='likes')
+    user = models.ForeignKey(User, default=None, on_delete=models.CASCADE)
     class Meta:
-        unique_together = ('answer', 'like')  # Исправлено на 'answer' и 'like'
-
-
-class Like(models.Model):
-    id = models.AutoField(primary_key=True, editable=False)
-    author = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
-
-    def __str__(self) -> str:
-        return self.author.username
+        unique_together = ('answer', 'user')

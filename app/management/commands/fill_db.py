@@ -1,7 +1,7 @@
 import random
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
-from app.models import Question, Answer, Tag, Like  # Импортируйте ваши модели
+from app.models import Question, Answer, Tag
 from django.db import connection
 class Command(BaseCommand):
     help = 'Заполняет базу данных тестовыми данными'
@@ -67,9 +67,9 @@ class Command(BaseCommand):
         except Exception as e:
             self.stdout.write(self.style.ERROR(f'Ошибка создания ответов: {e}'))
         # Создание оценок
-        try:
-            likes = [Like(author=random.choice(users)) for i in range(ratio * 200)]
-            self.stdout.write(self.style.SUCCESS(f'Создано {len(likes)} оценок'))
-            Like.objects.bulk_create(likes)
-        except Exception as e:
-            self.stdout.write(self.style.ERROR(f'Ошибка создания лайков: {e}'))
+        # try:
+        #     likes = [Like(author=random.choice(users)) for i in range(ratio * 200)]
+        #     self.stdout.write(self.style.SUCCESS(f'Создано {len(likes)} оценок'))
+        #     Like.objects.bulk_create(likes)
+        # except Exception as e:
+        #     self.stdout.write(self.style.ERROR(f'Ошибка создания лайков: {e}'))

@@ -1,8 +1,7 @@
 from django.shortcuts import render
-from static.mock.question import questions
+# from static.mock.question import questions
 from .models import Question
 from django.core.paginator import Paginator, EmptyPage
-
 
 # Create your views here.
 
@@ -21,8 +20,7 @@ def paginate(objects_list, request, per_page=5):
     return page
 
 def index(request):
-    
-    questions = Question.objects.all().prefetch_related('tags')
+    questions = Question.objects.all_questions()
     page = paginate(questions, request=request)
     return render(request, 'index.html', context={"items" : page.object_list, 'page_obj': page})
 
@@ -44,7 +42,9 @@ def ask(request):
     return render(request, 'ask.html')
 
 def single_question(request, question_id):
-    return render(request, 'single_question.html', context={"item": questions[question_id]})
+    question = Question.objects.question_with_id(question_id)
+    answers = paginate(question.answers.all(), request)
+    return render(request, 'single_question.html', context={"item": question, "answers" :answers})
 
 def tag_id(request, tag):
     questions = Question.objects.questions_with_tag(tag)
