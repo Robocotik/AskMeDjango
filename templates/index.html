@@ -9,7 +9,7 @@
     {% block content %}
     <div class='flex flex-col gap-4 w-full'>
         {% for item in items %}
-        {% include "layouts/card_layout.html" with id=item.id image_url=item.image_url like_count=item.like_count title=item.title desc=item.desc answer_count=item.answer_count tags=item.tags.all %}
+        {% include "layouts/card_layout.html" with id=item.id image_url=item.image_url likes_count=item.likes_count title=item.title desc=item.desc answer_count=item.answer_count tags=item.tags.all %}
         {% endfor %}
     </div>
     {% endblock content %}

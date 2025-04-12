@@ -22,7 +22,7 @@ def paginate(objects_list, request, per_page=5):
 def index(request):
     questions = Question.objects.all_questions()
     page = paginate(questions, request=request)
-    return render(request, 'index.html', context={"items" : page.object_list, 'page_obj': page})
+    return render(request, 'index.html', context={"items" : page, 'page_obj': page})
 
 def settings(request):
     return render(request, 'settings.html',)
@@ -44,7 +44,7 @@ def ask(request):
 def single_question(request, question_id):
     question = Question.objects.question_with_id(question_id)
     answers = paginate(question.answers.all(), request)
-    return render(request, 'single_question.html', context={"item": question, "answers" :answers})
+    return render(request, 'single_question.html', context={"item": question, "answers" :answers, 'page_obj': answers})
 
 def tag_id(request, tag):
     questions = Question.objects.questions_with_tag(tag)

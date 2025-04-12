@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Manager
 from django.db.models import Count
+from django.db.models import Prefetch
 from django.core.exceptions import ObjectDoesNotExist
 
 class Profile(models.Model):
@@ -13,22 +14,23 @@ class Profile(models.Model):
         return self.user.username
     
 class QuestionManager(Manager):
-    # questions_with_answer_count = Question.objects.annotate(answer_count=Count('answers'))
     def all_questions(self):
-        return self.annotate(answer_count=Count('answers'))
+        return self.annotate(answer_count=Count('answers'), likes_count=Count('likes'))
     def new_questions(self):
-        return self.annotate(answer_count=Count('answers')).order_by('-created_at')
+        return self.annotate(answer_count=Count('answers'), likes_count=Count('likes')).order_by('-created_at')
     def best_questions(self):
-        return self.annotate(answer_count=Count('answers')).order_by('-likes_count')
+        return self.annotate(answer_count=Count('answers'), likes_count=Count('likes')).order_by('-likes_count')
     
     def question_with_id(self, id):
         try:
-            return self.prefetch_related('answers', 'tags').annotate(answer_count=Count('answers')).get(id=int(id))
+            answers_with_likes = Answer.objects.annotate(likes_count=Count('answer_likes'))
+            return self.prefetch_related(
+            Prefetch('answers', queryset=answers_with_likes),'tags').annotate(answer_count=Count('answers'), likes_count=Count('likes')).get(id=int(id))
         except ObjectDoesNotExist:
             return None
         
     def questions_with_tag(self, tag_title):
-        self = self.annotate(answer_count=Count('answers'))
+        self = self.annotate(answer_count=Count('answers'), likes_count=Count('likes'))
         try:
             tag = Tag.objects.get(title=tag_title)
         except Tag.DoesNotExist:
@@ -47,7 +49,6 @@ class Question(models.Model):
     tags = models.ManyToManyField('Tag', related_name='questions')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    like_count = models.IntegerField(default=1)
     
     def __str__(self) -> str:
         return self.title
@@ -74,7 +75,7 @@ class QuestionLike(models.Model):
     class Meta:
         unique_together = ('question', 'user')
 class AnswerLike(models.Model):
-    answer = models.ForeignKey('Answer',default=None, on_delete=models.CASCADE, related_name='likes')
+    answer = models.ForeignKey('Answer',default=None, on_delete=models.CASCADE, related_name='answer_likes')
     user = models.ForeignKey(User, default=None, on_delete=models.CASCADE)
     class Meta:
         unique_together = ('answer', 'user')

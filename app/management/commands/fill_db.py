@@ -46,7 +46,7 @@ class Command(BaseCommand):
                 title=f'Вопрос {i}',
                 desc=f'Описание вопроса #{i}',
                 author=random.choice(users),
-                like_count=i,
+                likes_count=i,
                 )
                 question.save()
                 question.tags.set(selected_tags)  # Устанавливаем теги для вопроса
