@@ -40,3 +40,6 @@ def tag_id(request, tag):
     paginator = Paginator(questions, 5)
     page = paginator.page(page_num)
     return render(request, 'single_tag.html', context={"items": page, 'page_obj': page, "tag": tag})
+
+def custom_404_view(request, exception):
+    return render(request, '404.html', status=404)
