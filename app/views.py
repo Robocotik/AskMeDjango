@@ -34,7 +34,7 @@ def signup(request):
     return render(request, 'register.html')
 
 def hot(request):
-    questions = Question.objects.new_questions()
+    questions = Question.objects.best_questions()
     page = paginate(questions, request)
     return render(request, 'index.html', context={"items": page, 'page_obj': page})
 
