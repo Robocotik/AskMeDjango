@@ -13,8 +13,7 @@
 <body class='lato-regular w-full flex flex-col justify-start items-center'>
     <header class='flex justify-center w-full py-2 h-20 bg-gray-300'>
         <div class='flex justify-between w-full max-w-[60rem] items-center'>
-            <a
-                href='/'
+            <a href='/'
                 class='flex gap-2 h-full items-center cursor-pointer text-black hover:text-black/60 duration-200 transition-all'>
                 <svg width="auto" height="100%" class='h-full aspect-square  text-inherit' viewBox="0 0 48 48"
                     xmlns="http://www.w3.org/2000/svg">
@@ -47,7 +46,7 @@
                     class='border border-1 rounded-md px-4 hover:shadow duration-200 transition-all  h-full'>Ask</button>
             </div>
             <div class='flex gap-2 h-full'>
-                <img src="{% static "img/me.jpg" %}" alt="Avatar"
+                <img src="{% static " img/me.jpg" %}" alt="Avatar"
                     class='object-center object-cover h-full aspect-square rounded-md overflow-hidden border-1 border'>
                 <div class='flex flex-col items-start justify-center h-full'>
                     <p>Sasha</p>
@@ -117,10 +116,10 @@
                             Popular tags
                         </h2>
                         <div class='flex flex-wrap w-full gap-x-4 gap-y-2'>
-                            <p>perl</p>
-                            <p>python</p>
-                            <p>c++</p>
-                            <p>c#</p>
+                            <a href='/tag/perl'>perl</a>
+                            <a href='/tag/python'>python</a>
+                            <a href='/tag/c++'>c++</a>
+                            <a href='/tag/go'>go</a>
                         </div>
                     </div>
                     <div class='flex flex-col gap-2 w-full'>
@@ -137,7 +136,8 @@
                     </div>
                 </div>
             </div>
-            {% include "layouts/pagination.html" %}
+            {% block pagination %}
+            {% endblock pagination %}
         </div>
 
     </main>
