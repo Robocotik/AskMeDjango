@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% block header %}
-<h1 class='text-2xl'>Tag: {{tag}}</h1>
+<div class='flex gap-4 w-full items-center justify-start  border-b-2 border-gray-300'>
+    <h1 class='text-2xl'>Tag: {{tag}}</h1>
+</div>
 {% endblock header %}
 {% block content %}
 <div class='flex flex-col gap-4 w-full'>

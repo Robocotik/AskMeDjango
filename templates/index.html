@@ -1,7 +1,10 @@
 {% extends "base.html" %}
 {% block header %}
-<a class='text-2xl' href='/'>New questions</a>
+<div class='flex gap-4 w-full items-center justify-start  border-b-2 border-gray-300'>
+    <a class='text-2xl' href='/'>New questions</a>
     <a href="/hot">hot question</a>
+</div>
+
     {% endblock header %}
     {% block content %}
     <div class='flex flex-col gap-4 w-full'>
