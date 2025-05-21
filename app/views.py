@@ -1,7 +1,12 @@
-from django.shortcuts import render
+from django.shortcuts import redirect, render
+from django.urls import reverse, reverse_lazy
+
+from app.forms import LoginForm, RegisterForm
 # from static.mock.question import questions
 from .models import Question
 from django.core.paginator import Paginator, EmptyPage
+from django.contrib import auth
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 
@@ -19,19 +24,47 @@ def paginate(objects_list, request, per_page=5):
     
     return page
 
+@login_required(login_url=reverse_lazy('login'))
 def index(request):
     questions = Question.objects.all_questions()
     page = paginate(questions, request=request)
     return render(request, 'index.html', context={"items" : page, 'page_obj': page})
 
+
 def settings(request):
     return render(request, 'settings.html',)
 
 def login(request):
-    return render(request, 'login.html')
+    form = LoginForm()
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():    
+            user = auth.authenticate(request, **form.cleaned_data)
+            print(user)
+            if user:
+                auth.login(request, user)
+                return redirect(reverse_lazy('index'))
+            else:
+                form.add_error(field=None, error='User not found')
+    return render(request, 'login.html', context={'form': form})
+
+
 
 def signup(request):
-    return render(request, 'register.html')
+    form = LoginForm()
+    if request.method == 'POST':
+        form = RegisterForm(request.POST)
+        if form.is_valid():    
+            user = auth.authenticate(request, **form.cleaned_data)
+            if user:
+                form.add_error(field=None, error='User already exists')
+            else:
+                user = form.save()
+                auth.login(request, user)
+                return redirect(reverse_lazy('index'))
+
+        
+    return render(request, 'register.html', context={'form': form})
 
 def hot(request):
     questions = Question.objects.best_questions()

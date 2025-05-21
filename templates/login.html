@@ -6,33 +6,45 @@
 
 {% endblock header %}
 {% block content %}
-<div class='w-full flex flex-col gap-4 justify-start items-start'>
-    <div class='w-full flex gap-8 items-center justify-start'>
-        <label for='login' class='w-36 text-nowrap'>
-            login
-        </label>
-        <input type="text" name="login" id="login" placeholder='login' required
-            class='border border-1 rounded-md border-gray-200 w-full ps-2 py-1'>
-    </div>
-    <div class='w-full flex gap-8 items-center justify-start  w-full'>
-        <label for='password' class='w-36 text-nowrap'>
-            password
-        </label>
-        <input type="password" name="password" id="password" placeholder='password'
-            class='border border-1 rounded-md border-gray-200 h-full py-1 ps-2 w-full'></input>
-    </div>
+<div>
+    <form action="" method="POST" class='w-full flex flex-col gap-4 justify-start items-start'>
+        <div class='w-full flex gap-8 items-center justify-start'>
+            <label for='username' class='w-36 text-nowrap'>
+                login
+            </label>
+            <input type="text" name="username" id="username" placeholder='login' required
+                class='border border-1 rounded-md border-gray-200 w-full ps-2 py-1'>
+        </div>
+        <div class='w-full flex gap-8 items-center justify-start  w-full'>
+            <label for='password' class='w-36 text-nowrap'>
+                password
+            </label>
+            <input type="password" name="password" id="password" placeholder='password'
+                class='border border-1 rounded-md border-gray-200 h-full py-1 ps-2 w-full'></input>
+        </div>
 
-    <div class='flex items-center gap-2 justify-start'>
-        <button
-            class='duration-200 transition-all border border-1 border-gray-200 rounded-md hover:shadow cursor-pointer px-2 py-1'>Log
-            in!
-        </button>
-        <a href="/" class='hover:shadow border border-1 border-gray-200 rounded-md px-2 py-1'>Create
-            new
-            account</a>
-    </div>
-
-
+        <div class='flex flex-col gap-4 items-start'>
+            {% for field in form %}
+            {% for error in field.errors %}
+            <p class='text-red-500'>{{ error }}</p>
+            {% endfor %}
+            {% endfor %}
+            {% if form.non_field_errors %}
+            {% for error in form.non_field_errors %}
+            <p class='text-red-500'>{{ error }}</p>
+            {% endfor %}
+            {% endif %}
+        </div>
+        <div class='flex items-center gap-2 justify-start'>
+            <button type='submit'
+                class='duration-200 transition-all border border-1 border-gray-200 rounded-md hover:shadow cursor-pointer px-2 py-1'>Log
+                in!
+            </button>
+            <a href="/" class='hover:shadow border border-1 border-gray-200 rounded-md px-2 py-1'>Create
+                new
+                account</a>
+        </div>
+    </form>
 </div>
 
 {% endblock content %}
