@@ -10,6 +10,35 @@ class LoginForm(forms.Form):
     def clean(self) -> dict[str, Any]:
         return super().clean()
 
+class SettingsForm(forms.ModelForm):
+    email = forms.EmailField(required=True)
+    nickname = forms.CharField(max_length=255, required=True)
+    avatar = forms.ImageField(required=False)
+    
+    class Meta:
+        model = User
+        fields = ['email'] 
+
+    def __init__(self, *args, **kwargs):
+        self.profile = kwargs.pop('profile', None)
+        super().__init__(*args, **kwargs)
+        
+        if self.profile:
+            self.fields['email'].initial = self.profile.user.email
+            self.fields['nickname'].initial = self.profile.nickname
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        if commit:
+            user.save(update_fields=['email'])
+            # Обновляем профиль
+            if self.profile:
+                self.profile.nickname = self.cleaned_data['nickname']
+                if self.cleaned_data.get('avatar'):
+                    self.profile.avatar = self.cleaned_data['avatar']
+                self.profile.save()
+        
+        return user
 
 class RegisterForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput, min_length=5, required=True)

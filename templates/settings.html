@@ -1,24 +1,52 @@
 {% extends "base.html" %}
 {% block header %}
 <div class='flex gap-4 w-full items-center justify-start  border-b-2 border-gray-300'>
-    <h1 class='text-2xl'>Settings: Lololowka</h1>
+    <h1 class='text-2xl'>Settings: {{ item.nickname }}</h1>
 </div>
 
 {% endblock header %}
 {% block content %}
-<div class='w-full flex flex-col gap-4 justify-start items-start'>
-    <div class='w-full flex gap-8 items-center justify-start'>
-        <label for='login' class='w-36 text-nowrap'>
-            login
+<form action='' enctype='multipart/form-data' method='post'
+    class='w-full flex flex-col gap-4 justify-start items-start'>
+    {% csrf_token %}
+    <div class='w-full flex gap-8 items-center justify-center w-full'>
+        <label for='avatar' class='cursor-pointer relative'>
+            <img id="avatarImage" src="{{ item.avatar.image.url }}" alt="person"
+                class='rounded-full size-40 object-center object-cover'>
+            <svg width="24px" height="24px" class='absolute bottom-0 right-0' viewBox="0 0 24 24" fill="none"
+                xmlns="http://www.w3.org/2000/svg" stroke="#000000">
+                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                <g id="SVGRepo_iconCarrier">
+                    <path
+                        d="M16.652 3.45506L17.3009 2.80624C18.3759 1.73125 20.1188 1.73125 21.1938 2.80624C22.2687 3.88124 22.2687 5.62415 21.1938 6.69914L20.5449 7.34795M16.652 3.45506C16.652 3.45506 16.7331 4.83379 17.9497 6.05032C19.1662 7.26685 20.5449 7.34795 20.5449 7.34795M16.652 3.45506L10.6872 9.41993C10.2832 9.82394 10.0812 10.0259 9.90743 10.2487C9.70249 10.5114 9.52679 10.7957 9.38344 11.0965C9.26191 11.3515 9.17157 11.6225 8.99089 12.1646L8.41242 13.9M20.5449 7.34795L14.5801 13.3128C14.1761 13.7168 13.9741 13.9188 13.7513 14.0926C13.4886 14.2975 13.2043 14.4732 12.9035 14.6166C12.6485 14.7381 12.3775 14.8284 11.8354 15.0091L10.1 15.5876M10.1 15.5876L8.97709 15.9619C8.71035 16.0508 8.41626 15.9814 8.21744 15.7826C8.01862 15.5837 7.9492 15.2897 8.03811 15.0229L8.41242 13.9M10.1 15.5876L8.41242 13.9"
+                        stroke="#1C274C" stroke-width="1.5"></path>
+                    <path d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2"
+                        stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"></path>
+                </g>
+            </svg>
         </label>
-        <input type="text" name="login" id="login" placeholder='login'
-            class='border border-1 rounded-md border-gray-200 w-full ps-2 py-1'>
+        <input type="file" name="avatar" id="avatar" accept="image/png, image/jpeg" class='hidden'
+            onchange="previewImage(event)" />
     </div>
+    <script>
+        function previewImage(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const img = document.getElementById('avatarImage');
+                img.src = e.target.result; // Устанавливаем новое изображение
+            };
+            if (file) {
+                reader.readAsDataURL(file); // Читаем файл как Data URL
+            }
+        }
+    </script>
     <div class='w-full flex gap-8 items-center justify-start  w-full'>
         <label for='email' class='w-36 text-nowrap'>
             email
         </label>
-        <input type="email" name="email" id="email" placeholder='email'
+        <input type="email" name="email" id="email" placeholder='email' value="{{ item.user.email|default:'email' }}"
             class='border border-1 rounded-md border-gray-200 h-full py-1 ps-2 w-full'></input>
     </div>
     <div class='w-full flex gap-8 items-center justify-start w-full'>
@@ -26,17 +54,19 @@
             nickname
         </label>
         <input type="text" name="nickname" id="nickname" placeholder='nickname'
+            value="{{ item.nickname|default:' nickname' }}"
             class='border rounded-md border-1 border-gray-200 w-full py-1 ps-2'>
     </div>
-    <div class='w-full flex gap-8 items-center justify-start w-full'>
-        <label for='avatar' class='w-36 text-nowrap'>
-            upload avatar
-        </label>
-        <input type="file" name="avatar" id="avatar" accept="image/png, image/jpeg"
-            class='border rounded-md border-1 border-gray-200 w-full py-1' />
+
+
+    <div class="text-red-500">
+        {% if form.errors %}
+        {{form.errors.as_text}}
+        {% endif %}
+
     </div>
 
-    <button
+    <button type='submit'
         class='duration-200 transition-all border border-1 border-gray-200 rounded-md hover:shadow cursor-pointer px-2 py-1'>Save</button>
-</div>
+</form>
 {% endblock content %}

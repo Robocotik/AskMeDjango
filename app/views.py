@@ -1,9 +1,9 @@
 from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
 
-from app.forms import LoginForm, RegisterForm
+from app.forms import LoginForm, RegisterForm, SettingsForm
 # from static.mock.question import questions
-from .models import Question
+from .models import Avatar, Question, Profile
 from django.core.paginator import Paginator, EmptyPage
 from django.contrib import auth
 from django.contrib.auth.decorators import login_required
@@ -30,9 +30,35 @@ def index(request):
     page = paginate(questions, request=request)
     return render(request, 'index.html', context={"items" : page, 'page_obj': page})
 
-
 def settings(request):
-    return render(request, 'settings.html',)
+    profile, _ = Profile.objects.get_or_create(user=request.user)
+    
+    if request.method == 'POST':
+        form = SettingsForm(request.POST, request.FILES)
+        if form.is_valid():
+            print('ФОРМА ВАЛИДНА')
+            # Обновляем данные пользователя
+            request.user.email = form.cleaned_data['email']
+            request.user.save()
+            
+            # Обновляем профиль
+            profile.nickname = form.cleaned_data['nickname']
+            if form.cleaned_data['avatar']:
+                avatar = Avatar(image=form.cleaned_data['avatar'])
+                avatar.save()
+                profile.avatar = avatar
+            profile.save()
+            
+            return redirect('settings')
+    else:
+        # Инициализируем форму с текущими данными
+        initial_data = {
+            'email': request.user.email,
+            'nickname': profile.nickname
+        }
+        form = SettingsForm(initial=initial_data)
+    
+    return render(request, 'settings.html', context={"item": profile, 'form': form})
 
 def logout(request):
     auth.logout(request)

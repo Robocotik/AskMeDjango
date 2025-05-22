@@ -10,12 +10,21 @@ class Avatar(models.Model):
     image = models.ImageField(upload_to='uploads/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+class ProfileManager(Manager):
+     def profile_with_id(self, id):
+        try:
+            return Profile.objects.get(id=int(id))
+
+        except ObjectDoesNotExist:
+            return None
+        
 class Profile(models.Model):
+    objects = ProfileManager()
     id = models.BigAutoField(auto_created=True, primary_key=True, serialize=True)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     avatar = models.OneToOneField(Avatar, on_delete=models.PROTECT, null=True, blank=True)
     nickname = models.CharField(max_length=255, null=True, blank=True)
-
+        
     def __str__(self) -> str:
         return self.user.username
 
