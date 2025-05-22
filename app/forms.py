@@ -2,7 +2,7 @@ from typing import Any
 from django import forms
 from django.contrib.auth.models import User
 
-from app.models import Profile
+from app.models import Avatar, Profile
 class LoginForm(forms.Form):
     username = forms.CharField(max_length=40, required=True)
     password = forms.CharField(widget=forms.PasswordInput, min_length=5, required=True)
@@ -37,10 +37,12 @@ class RegisterForm(forms.ModelForm):
         
         if commit:
             user.save()
-            
+            avatar = None
+            if self.cleaned_data['avatar']:
+                avatar = Avatar.objects.create(image=self.cleaned_data['avatar'])
             Profile.objects.create(
                 user=user,
-                avatar=self.cleaned_data['avatar'],
+                avatar=avatar,
                 nickname=self.cleaned_data['nickname'],
             )
         

@@ -5,15 +5,22 @@ from django.db.models import Count
 from django.db.models import Prefetch
 from django.core.exceptions import ObjectDoesNotExist
 
+
+class Avatar(models.Model):
+    image = models.ImageField(upload_to='uploads/', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
 class Profile(models.Model):
     id = models.BigAutoField(auto_created=True, primary_key=True, serialize=True)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
+    avatar = models.OneToOneField(Avatar, on_delete=models.PROTECT, null=True, blank=True)
     nickname = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self) -> str:
         return self.user.username
-    
+
+
+
 class QuestionManager(Manager):
     def all_questions(self):
         return self.annotate(answer_count=Count('answers'), likes_count=Count('likes'))

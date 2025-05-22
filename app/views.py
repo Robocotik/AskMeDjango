@@ -36,7 +36,8 @@ def settings(request):
 
 def logout(request):
     auth.logout(request)
-    return redirect(reverse('login'))
+    next_page = request.GET.get('continue', 'login')
+    return redirect(next_page)
 
 def login(request):
     form = LoginForm()
@@ -56,7 +57,7 @@ def login(request):
 def signup(request):
     form = RegisterForm()
     if request.method == 'POST':
-        form = RegisterForm(request.POST)
+        form = RegisterForm(request.POST, request.FILES)
         if form.is_valid():    
             user = auth.authenticate(request, **form.cleaned_data)
             if user:
