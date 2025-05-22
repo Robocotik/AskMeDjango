@@ -8,6 +8,7 @@
 {% block content %}
 <div>
     <form action="" method="POST" class='w-full flex flex-col gap-4 justify-start items-start'>
+        {% csrf_token %}
         <div class='w-full flex gap-8 items-center justify-start'>
             <label for='username' class='w-36 text-nowrap'>
                 login
@@ -40,7 +41,7 @@
                 class='duration-200 transition-all border border-1 border-gray-200 rounded-md hover:shadow cursor-pointer px-2 py-1'>Log
                 in!
             </button>
-            <a href="/" class='hover:shadow border border-1 border-gray-200 rounded-md px-2 py-1'>Create
+            <a href="/signup" class='hover:shadow border border-1 border-gray-200 rounded-md px-2 py-1'>Create
                 new
                 account</a>
         </div>

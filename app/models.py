@@ -9,6 +9,7 @@ class Profile(models.Model):
     id = models.BigAutoField(auto_created=True, primary_key=True, serialize=True)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
+    nickname = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self) -> str:
         return self.user.username

@@ -34,13 +34,16 @@ def index(request):
 def settings(request):
     return render(request, 'settings.html',)
 
+def logout(request):
+    auth.logout(request)
+    return redirect(reverse('login'))
+
 def login(request):
     form = LoginForm()
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():    
             user = auth.authenticate(request, **form.cleaned_data)
-            print(user)
             if user:
                 auth.login(request, user)
                 return redirect(reverse_lazy('index'))
@@ -51,7 +54,7 @@ def login(request):
 
 
 def signup(request):
-    form = LoginForm()
+    form = RegisterForm()
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():    
