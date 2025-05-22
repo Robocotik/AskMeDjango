@@ -48,11 +48,11 @@
             <div class='flex gap-2 h-full min-w-50'>
 
                 {% if user.is_authenticated %}
-                <img src="{% static " img/me.jpg" %}" alt="Avatar"
+                <img src="{{user.profile.avatar.image.url}}" alt="Avatar"
                     class='object-center object-cover h-full aspect-square rounded-md overflow-hidden border-1 border'>
 
                 <div class='flex flex-col items-start justify-center h-full'>
-                    <p>Sasha</p>
+                    <p>{{user.profile.nickname}}</p>
                     <div class='flex gap-2 justify-start h-1/2 '>
                         <div
                             class='flex gap-1 h-full items-center cursor-pointer px-2 py-1 hover:shadow border border-1 border-gray-250 rounded-md duration-200 transition-all'>
