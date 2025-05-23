@@ -6,7 +6,8 @@
 
 {% endblock header %}
 {% block content %}
-<div class='w-full flex flex-col gap-4 justify-start items-start'>
+<form action='' method='post' class='w-full flex flex-col gap-4 justify-start items-start'>
+    {% csrf_token %}
     <div class='w-full flex gap-8 items-start justify-start'>
         <label for='title'>
             Title:
@@ -14,10 +15,10 @@
         <input type="text" name="title" id="title" class='border border-1 rounded-md border-gray-200 w-full ps-2'>
     </div>
     <div class='w-full flex gap-8 items-start justify-start h-40 w-full'>
-        <label for='text'>
+        <label for='desc'>
             Text:
         </label>
-        <textarea type="text" name="text" id="text"
+        <textarea type="text" name="desc" id="desc"
             class='border border-1 rounded-md border-gray-200 h-full ps-2 w-full'></textarea>
     </div>
     <div class='w-full flex gap-8 items-start justify-start w-full'>
@@ -26,10 +27,15 @@
         </label>
         <input type="text" name="tags" id="tags" class='border rounded-md border-1 border-gray-200 w-full ps-2'>
     </div>
+    <div class="text-red-500">
+        {% if form.errors %}
+        {{form.errors.as_text}}
+        {% endif %}
 
-    <button
+    </div>
+    <button type='submit'
         class='duration-200 transition-all border border-1 border-gray-200 rounded-md hover:shadow cursor-pointer px-2 py-1'>Ask!</button>
 
-</div>
+</form>
 
 {% endblock content %}

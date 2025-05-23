@@ -1,7 +1,7 @@
 from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
 
-from app.forms import LoginForm, RegisterForm, SettingsForm
+from app.forms import AskForm, LoginForm, RegisterForm, SettingsForm
 # from static.mock.question import questions
 from .models import Avatar, Question, Profile
 from django.core.paginator import Paginator, EmptyPage
@@ -102,7 +102,13 @@ def hot(request):
     return render(request, 'index.html', context={"items": page, 'page_obj': page})
 
 def ask(request):
-    return render(request, 'ask.html')
+    form = AskForm()
+    if request.method == 'POST':
+        form = AskForm(request.POST)
+        if form.is_valid():
+            question = form.save(user=request.user)
+            return redirect(reverse_lazy('question', kwargs={'question_id': question.id}))
+    return render(request, 'ask.html', {'form': form})
 
 def single_question(request, question_id):
     question = Question.objects.question_with_id(question_id)

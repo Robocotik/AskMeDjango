@@ -2,11 +2,34 @@ from typing import Any
 from django import forms
 from django.contrib.auth.models import User
 
-from app.models import Avatar, Profile
+from app.models import Avatar, Profile, Question, Tag
 class LoginForm(forms.Form):
     username = forms.CharField(max_length=40, required=True)
     password = forms.CharField(widget=forms.PasswordInput, min_length=5, required=True)
 
+    def clean(self) -> dict[str, Any]:
+        return super().clean()
+
+class AskForm(forms.ModelForm):
+    title = forms.CharField(required=True, min_length=10)
+    desc = forms.CharField(required=True, min_length=10)
+    tags = forms.CharField(required=True, min_length=4)
+    class Meta:
+        model = Question
+        fields = ['title', 'desc', 'tags']
+    def save(self, user, commit=True):  # Добавляем параметр user
+        question = super().save(commit=False)
+        question.author_id = user.id  # Устанавливаем автора вопроса
+        if commit:
+            question.save() 
+            
+            tag_titles = self.cleaned_data['tags'].split(',')  # Предполагаем, что теги разделены запятыми
+            for title in tag_titles:
+                tag, created = Tag.objects.get_or_create(title=title.strip())  # Получаем или создаем тег
+                question.tags.add(tag)  # Добавляем тег к вопросу
+        return question
+        
+        
     def clean(self) -> dict[str, Any]:
         return super().clean()
 

@@ -111,6 +111,7 @@
 
                 {% block content%}{% endblock content %}
 
+                {% if user.is_authenticated %}
 
                 <div class='flex flex-col gap-4 w-1/5'>
                     <div class='flex flex-col gap-2 w-full'>
@@ -137,7 +138,9 @@
                         </div>
                     </div>
                 </div>
+                {% endif %}
             </div>
+
             {% block pagination %}
             {% endblock pagination %}
         </div>
