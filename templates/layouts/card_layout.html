@@ -6,7 +6,7 @@
             class='object-cover object-center rounded-md overflow-hidden'>
         <div class='flex gap-2 h-10 items-center'>
             <button data-image-id="{{ id }}" type="button"
-                class="h-full hover:shadow p-2 rounded-xl overflow-hidden border border-1 border-gray-200 {% if is_liked %}bg-green-500{% endif %}">
+                class="h-full hover:shadow p-2 rounded-xl overflow-hidden border border-1 {% if is_liked %}border-green-500{% else %}border-gray-200{% endif %}">
                 <svg width="auto" height="100%" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
                     <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round">

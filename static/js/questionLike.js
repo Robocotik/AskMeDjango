@@ -32,9 +32,9 @@ for (const item of likeButtons) {
     fetch(request).then(response => {
       response.json().then(data => {
         if (!data.is_liked) {
-          item.classList.remove('bg-green-500');
+          item.classList.remove('border-green-500');
         } else {
-          item.classList.add('bg-green-500');
+          item.classList.add('border-green-500');
         }
         const counter = document.querySelector(`p[data-like-counter="${item.dataset.imageId}"]`);
         // console.log('СЧЕТЧИК', counter);
