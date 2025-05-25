@@ -1,12 +1,14 @@
+from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
 
-from app.forms import AskForm, LoginForm, RegisterForm, SettingsForm
+from app.forms import AnswerForm, AskForm, LoginForm, RegisterForm, SettingsForm
 # from static.mock.question import questions
-from .models import Avatar, Question, Profile
+from .models import Avatar, Question, Profile, QuestionLike
 from django.core.paginator import Paginator, EmptyPage
 from django.contrib import auth
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 
 # Create your views here.
 
@@ -113,7 +115,14 @@ def ask(request):
 def single_question(request, question_id):
     question = Question.objects.question_with_id(question_id)
     answers = paginate(question.answers.all(), request)
-    return render(request, 'single_question.html', context={"item": question, "answers" :answers, 'page_obj': answers})
+    is_liked = QuestionLike.objects.filter(question=question, user=request.user).exists()
+    form = AnswerForm()
+    if request.method == 'POST':
+        form = AnswerForm(request.POST)
+        if form.is_valid():
+            form.save(user=request.user, question_id=question_id)
+            return redirect(reverse_lazy('question', kwargs={'question_id': question.id}))
+    return render(request, 'single_question.html', context={"item": question, "answers" :answers, 'page_obj': answers, 'form': form, 'is_liked': is_liked})
 
 def tag_id(request, tag):
     questions = Question.objects.questions_with_tag(tag)
@@ -122,3 +131,13 @@ def tag_id(request, tag):
 
 def custom_404_view(request, exception):
     return render(request, '404.html', status=404)
+
+@login_required
+@require_POST
+def likeQuestion(request, question_id):
+    question = Question.objects.question_with_id(question_id)
+    if question:
+        questionLike, is_created = QuestionLike.objects.get_or_create(user=request.user, question=question) 
+        if not is_created:
+            questionLike.delete()
+    return JsonResponse({'likes_count': QuestionLike.objects.filter(question=question).count(), 'is_liked': is_created})

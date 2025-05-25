@@ -42,8 +42,8 @@
 
             <div class='flex gap-2'>
                 <input type="text" placeholder='Search' class='rounded-md ps-2 overflow-hidden'>
-                <button
-                    class='border border-1 rounded-md px-4 hover:shadow duration-200 transition-all  h-full'>Ask</button>
+                <a href="{% url 'ask' %}"
+                    class='border border-1 rounded-md px-4 hover:shadow duration-200 transition-all  h-full'>Ask</a>
             </div>
             <div class='flex gap-2 h-full min-w-50'>
 
@@ -154,7 +154,7 @@
         </div>
 
     </footer>
-
+    <script src='{% static 'js/questionLike.js' %}'></script>
 </body>
 
 </html>

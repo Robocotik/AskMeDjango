@@ -2,13 +2,28 @@ from typing import Any
 from django import forms
 from django.contrib.auth.models import User
 
-from app.models import Avatar, Profile, Question, Tag
+from app.models import Answer, Avatar, Profile, Question, Tag
 class LoginForm(forms.Form):
     username = forms.CharField(max_length=40, required=True)
     password = forms.CharField(widget=forms.PasswordInput, min_length=5, required=True)
 
     def clean(self) -> dict[str, Any]:
         return super().clean()
+    
+
+class AnswerForm(forms.ModelForm):
+    content = forms.CharField(required=True, min_length=10)
+    
+    class Meta:
+        model = Answer
+        fields = ['content']
+    def save(self, user, question_id, commit=True):
+        answer = super().save(commit=False)
+        answer.author_id = user.id  
+        answer.question_id = question_id
+        if commit:
+            answer.save() 
+        return answer
 
 class AskForm(forms.ModelForm):
     title = forms.CharField(required=True, min_length=10)
@@ -17,16 +32,16 @@ class AskForm(forms.ModelForm):
     class Meta:
         model = Question
         fields = ['title', 'desc', 'tags']
-    def save(self, user, commit=True):  # Добавляем параметр user
+    def save(self, user, commit=True):
         question = super().save(commit=False)
-        question.author_id = user.id  # Устанавливаем автора вопроса
+        question.author_id = user.id  
         if commit:
             question.save() 
             
-            tag_titles = self.cleaned_data['tags'].split(',')  # Предполагаем, что теги разделены запятыми
+            tag_titles = self.cleaned_data['tags'].split(',') 
             for title in tag_titles:
-                tag, created = Tag.objects.get_or_create(title=title.strip())  # Получаем или создаем тег
-                question.tags.add(tag)  # Добавляем тег к вопросу
+                tag, _ = Tag.objects.get_or_create(title=title.strip())
+                question.tags.add(tag)
         return question
         
         
