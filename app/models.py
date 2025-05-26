@@ -11,12 +11,21 @@ class Avatar(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 class ProfileManager(Manager):
-     def profile_with_id(self, id):
+    def profile_with_id(self, id):
         try:
             return Profile.objects.get(id=int(id))
 
         except ObjectDoesNotExist:
             return None
+    
+    def get_avatar_url(self, user):
+        try:
+            profile = Profile.objects.get(user=user)
+            if profile.avatar and profile.avatar.image:
+                return profile.avatar.image.url
+        except (AttributeError, Profile.DoesNotExist):
+            pass
+        return '/static/empty_avatar.jpg'
         
 class Profile(models.Model):
     objects = ProfileManager()
@@ -24,7 +33,8 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     avatar = models.OneToOneField(Avatar, on_delete=models.PROTECT, null=True, blank=True)
     nickname = models.CharField(max_length=255, null=True, blank=True)
-        
+    
+    
     def __str__(self) -> str:
         return self.user.username
 
@@ -103,6 +113,7 @@ class Tag(models.Model):
     def __str__(self) -> str:
         return self.title
     
+
 class Answer(models.Model):
     question = models.ForeignKey('Question', on_delete=models.CASCADE, related_name='answers', blank=True, null=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)

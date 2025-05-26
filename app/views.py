@@ -113,6 +113,9 @@ def ask(request):
 def single_question(request, question_id):
     question = Question.objects.question_with_id(question_id)
     answers = paginate(question.answers.all(), request)
+    
+    avatar = Profile.objects.get_avatar_url(user=question.author)
+    
     is_liked = QuestionLike.objects.filter(question=question, user=request.user).exists()
     form = AnswerForm()
     if request.method == 'POST':
@@ -120,7 +123,7 @@ def single_question(request, question_id):
         if form.is_valid():
             form.save(user=request.user, question_id=question_id)
             return redirect(reverse_lazy('question', kwargs={'question_id': question.id}))
-    return render(request, 'single_question.html', context={"item": question, "answers" :answers, 'page_obj': answers, 'form': form, 'is_liked': is_liked, 'likes_count': question.likes.count()})
+    return render(request, 'single_question.html', context={"item": question, "answers" :answers, 'page_obj': answers, 'form': form, 'is_liked': is_liked, 'likes_count': question.likes.count(), 'avatar': avatar})
 
 def tag_id(request, tag):
     questions = Question.objects.questions_with_tag(tag)
