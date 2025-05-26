@@ -31,20 +31,47 @@ class Profile(models.Model):
 
 
 class QuestionManager(Manager):
+    
     def all_questions(self):
-        return self.annotate(answer_count=Count('answers'), likes_count=Count('likes'))
+        return self.prefetch_related(
+            'tags',
+            'likes'
+        ).annotate(
+            answer_count=Count('answers', distinct=True),
+            likes_count=Count('likes', distinct=True)
+        )
+    
     def new_questions(self):
-        return self.annotate(answer_count=Count('answers'), likes_count=Count('likes')).order_by('-created_at')
+        return self.prefetch_related(
+            'tags',
+            'likes'
+        ).annotate(
+            answer_count=Count('answers', distinct=True),
+            likes_count=Count('likes', distinct=True)
+        ).order_by('-created_at')
+    
     def best_questions(self):
-        return self.annotate(answer_count=Count('answers'), likes_count=Count('likes')).order_by('-likes_count')
+        return self.prefetch_related(
+            'tags',
+            'likes'
+        ).annotate(
+            answer_count=Count('answers', distinct=True),
+            likes_count=Count('likes', distinct=True)
+        ).order_by('-likes_count')
     
     def question_with_id(self, id):
         try:
-            answers_with_likes = Answer.objects.annotate(likes_count=Count('answer_likes'))
             return self.prefetch_related(
-            Prefetch('answers', queryset=answers_with_likes),'tags').annotate(answer_count=Count('answers'), likes_count=Count('likes')).get(id=int(id))
+                Prefetch('answers', queryset=Answer.objects.annotate(likes_count=Count('answer_likes'))),
+                'tags',
+                'likes'
+            ).annotate(
+                answer_count=Count('answers')
+            ).get(id=int(id))
         except ObjectDoesNotExist:
             return None
+    
+    
         
     def questions_with_tag(self, tag_title):
         self = self.annotate(answer_count=Count('answers'), likes_count=Count('likes'))

@@ -38,12 +38,10 @@ def settings(request):
     if request.method == 'POST':
         form = SettingsForm(request.POST, request.FILES)
         if form.is_valid():
-            print('ФОРМА ВАЛИДНА')
-            # Обновляем данные пользователя
+            
             request.user.email = form.cleaned_data['email']
             request.user.save()
             
-            # Обновляем профиль
             profile.nickname = form.cleaned_data['nickname']
             if form.cleaned_data['avatar']:
                 avatar = Avatar(image=form.cleaned_data['avatar'])
@@ -53,7 +51,7 @@ def settings(request):
             
             return redirect('settings')
     else:
-        # Инициализируем форму с текущими данными
+    
         initial_data = {
             'email': request.user.email,
             'nickname': profile.nickname
@@ -122,7 +120,7 @@ def single_question(request, question_id):
         if form.is_valid():
             form.save(user=request.user, question_id=question_id)
             return redirect(reverse_lazy('question', kwargs={'question_id': question.id}))
-    return render(request, 'single_question.html', context={"item": question, "answers" :answers, 'page_obj': answers, 'form': form, 'is_liked': is_liked})
+    return render(request, 'single_question.html', context={"item": question, "answers" :answers, 'page_obj': answers, 'form': form, 'is_liked': is_liked, 'likes_count': question.likes.count()})
 
 def tag_id(request, tag):
     questions = Question.objects.questions_with_tag(tag)

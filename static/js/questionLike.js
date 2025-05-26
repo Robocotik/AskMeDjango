@@ -37,7 +37,6 @@ for (const item of likeButtons) {
           item.classList.add('border-green-500');
         }
         const counter = document.querySelector(`p[data-like-counter="${item.dataset.imageId}"]`);
-        // console.log('СЧЕТЧИК', counter);
         counter.innerHTML = data.likes_count;
       });
     });
