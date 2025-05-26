@@ -10,9 +10,9 @@
     </div>
     <form method='post' action="" class='flex flex-col items-start'>
         {% csrf_token %}
-        <div class='w-full flex gap-8 items-center justify-start  w-full'>
+        <div class='w-full flex gap-8 items-start justify-start  w-full'>
             <label for='content' class='w-36 text-nowrap'>
-                answer
+                Answer
             </label>
             <textarea type="text" name="content" id="content" placeholder='answer'
                 value="{{ item.user.content|default:'' }}"

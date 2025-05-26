@@ -4,7 +4,7 @@ from django.urls import reverse, reverse_lazy
 
 from app.forms import AnswerForm, AskForm, LoginForm, RegisterForm, SettingsForm
 # from static.mock.question import questions
-from .models import Avatar, Question, Profile, QuestionLike
+from .models import Answer, AnswerLike, Avatar, Question, Profile, QuestionLike
 from django.core.paginator import Paginator, EmptyPage
 from django.contrib import auth
 from django.contrib.auth.decorators import login_required
@@ -139,3 +139,15 @@ def likeQuestion(request, question_id):
         if not is_created:
             questionLike.delete()
     return JsonResponse({'likes_count': QuestionLike.objects.filter(question=question).count(), 'is_liked': is_created})
+
+
+
+@login_required
+@require_POST
+def likeAnswer(request, answer_id):
+    answer = Answer.objects.get(id=answer_id)
+    if answer:
+        answerLike, is_created = AnswerLike.objects.get_or_create(user=request.user, answer=answer) 
+        if not is_created:
+            answerLike.delete()
+    return JsonResponse({'likes_count': AnswerLike.objects.filter(answer=answer).count(), 'is_liked': is_created})
