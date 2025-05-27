@@ -13,6 +13,7 @@ urlpatterns = [
     path('tag/<str:tag>/', views.tag_id, name='tag'),
     path('question/<question_id>/like/', views.likeQuestion, name='like'),
     path('answer/<answer_id>/like/', views.likeAnswer, name='likeAnswer'),
+    path('answer/<answer_id>/correct/', views.correctAnswer, name='correctAnswer'),
     path('question/<int:question_id>/', views.single_question, name='question'),
     path('settings/', views.settings, name='settings'),
 ]

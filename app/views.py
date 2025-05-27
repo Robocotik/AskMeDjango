@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 
 from app.forms import AnswerForm, AskForm, LoginForm, RegisterForm, SettingsForm
@@ -115,9 +115,10 @@ def single_question(request, question_id):
     # print(Answer.objects.all_with_avatars(question=question, user=request.user).count())
     answers = paginate(Answer.objects.all_with_avatars(question=question, user=request.user), request)
     avatar = Profile.objects.get_avatar_url(user=question.author)
-    
     isLiked = QuestionLike.objects.filter(question=question, user=request.user).exists()
     form = AnswerForm()
+    print(answers[0].blockBecauseNotCorrect)
+    print(answers[1].blockBecauseNotCorrect)
     if request.method == 'POST':
         form = AnswerForm(request.POST)
         if form.is_valid():
@@ -154,3 +155,38 @@ def likeAnswer(request, answer_id):
         if not is_created:
             answerLike.delete()
     return JsonResponse({'likes_count': AnswerLike.objects.filter(answer=answer).count(), 'isLiked': is_created})
+
+@login_required
+@require_POST
+def correctAnswer(request, answer_id):
+    try:
+        # Получаем ответ и связанный вопрос
+        answer = get_object_or_404(Answer, id=answer_id)
+        question = answer.question
+        
+        # Проверяем, что текущий пользователь - автор вопроса
+        if question.author != request.user:
+            return JsonResponse({'error': 'You are not the author of this question'}, status=403)
+        
+        # Если ответ уже является правильным - снимаем отметку
+        if question.correct_answer == answer:
+            question.correct_answer = None
+            is_checked = False
+        else:
+            # Если у вопроса уже есть другой правильный ответ - запрещаем изменение
+            if question.correct_answer is not None:
+                return JsonResponse({
+                    'error': 'This question already has a correct answer',
+                    'isChecked': False
+                }, status=400)
+            
+            # Устанавливаем новый правильный ответ
+            question.correct_answer = answer
+            is_checked = True
+            
+        question.save()
+        
+        return JsonResponse({'isChecked': is_checked})
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)

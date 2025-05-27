@@ -36,7 +36,7 @@ class ProfileManager(Manager):
                 return profile.avatar.image_url  # Используем новый метод
         except (AttributeError, Profile.DoesNotExist):
             pass
-        return f"{settings.STATIC_URL}{settings.DEFAULT_AVATAR_URL}"
+        return f"/{settings.STATIC_URL}{settings.DEFAULT_AVATAR_URL}"
         
 class Profile(models.Model):
     objects = ProfileManager()
@@ -265,6 +265,12 @@ class AnswerManager(Manager):
                     then=Value(True)
                 ),
                 default=Value(False),
+                output_field=models.BooleanField()
+            ),
+            blockBecauseNotCorrect=Case(
+                When(question__correct_answer__isnull=True, then=Value(False)),
+                When(id=F('question__correct_answer__id'), then=Value(False)),
+                default=Value(True),
                 output_field=models.BooleanField()
             )
         )

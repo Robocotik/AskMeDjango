@@ -46,7 +46,6 @@ for (const item of likeButtons) {
 }
 
 const likeAnswerButtons = document.querySelectorAll('button[data-answer-image-id]')
-console.log(likeAnswerButtons)
 
 for (const item of likeAnswerButtons) {
   item.addEventListener('click', (e) => {
@@ -70,8 +69,33 @@ for (const item of likeAnswerButtons) {
           path.style.fill = '#00FF00'
         }
         const counter = document.querySelector(`p[data-answer-like-counter="${item.dataset.answerImageId}"]`)
-        console.log(counter)
         counter.innerHTML = data.likes_count
+      })
+    })
+  })
+}
+
+const CheckAnswerButtons = document.querySelectorAll('input[data-answer-correct-id]')
+for (const item of CheckAnswerButtons) {
+  item.addEventListener('click', (e) => {
+    const request = new Request(`/answer/${item.dataset.answerCorrectId}/correct/`, {
+      method: 'POST',
+      body: new URLSearchParams({
+        key1: 'value1',
+        key2: 2,
+      }),
+      headers: { 'X-CSRFToken': csrftoken },
+      mode: 'same-origin',
+    })
+
+    fetch(request).then((response) => {
+      response.json().then((data) => {
+        item.checked = data.isChecked
+        for (const itemnew of CheckAnswerButtons) {
+          if (itemnew !== item) {
+            itemnew.disabled = data.isChecked
+          }
+        }
       })
     })
   })
