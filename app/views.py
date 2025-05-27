@@ -29,7 +29,6 @@ def paginate(objects_list, request, per_page=5):
 @login_required(login_url=reverse_lazy('login'))
 def index(request):
     questions = Question.objects.all_questions(user=request.user)
-    print(questions[0].isLiked)
     page = paginate(questions, request=request)
     return render(request, 'index.html', context={"items" : page, 'page_obj': page})
 
@@ -98,7 +97,7 @@ def signup(request):
     return render(request, 'register.html', context={'form': form})
 
 def hot(request):
-    questions = Question.objects.best_questions()
+    questions = Question.objects.best_questions(user=request.user)
     page = paginate(questions, request)
     return render(request, 'index.html', context={"items": page, 'page_obj': page})
 

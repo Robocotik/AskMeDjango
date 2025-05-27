@@ -67,10 +67,16 @@ class QuestionManager(Manager):
         )
         
         if user and user.is_authenticated:
+            # Добавляем подзапрос для проверки лайка
+            liked_questions = QuestionLike.objects.filter(
+                question=models.OuterRef('pk'),
+                user=user
+            ).values('question')[:1]
+            
             queryset = queryset.annotate(
                 isLiked=Case(
                     When(
-                        likes__user=user,  # Исправлено здесь
+                        id__in=liked_questions,
                         then=Value(True)
                     ),
                     default=Value(False),
@@ -82,9 +88,9 @@ class QuestionManager(Manager):
                 isLiked=Value(False, output_field=models.BooleanField())
             )
         
-        return queryset.prefetch_related('tags')
+        return queryset.prefetch_related('tags').distinct()
     
-    def new_questions(self):
+    def new_questions(self, user=None):
         return self.prefetch_related(
             'tags',
             'likes'
@@ -104,10 +110,18 @@ class QuestionManager(Manager):
                 ),
                 default=Value('/static/empty_avatar.jpg'),
                 output_field=CharField()
-            )
-        ).order_by('-created_at')
+            ),
+                isLiked=Case(
+                    When(
+                        likes__user=user,  # Исправлено здесь
+                        then=Value(True)
+                    ),
+                    default=Value(False),
+                    output_field=models.BooleanField()
+                )
+        ).order_by('-created_at').distinct()
     
-    def best_questions(self):
+    def best_questions(self, user=None):
         return self.prefetch_related(
             'tags',
             'likes'
@@ -127,8 +141,16 @@ class QuestionManager(Manager):
                 ),
                 default=Value('/static/empty_avatar.jpg'),
                 output_field=CharField()
-            )
-        ).order_by('-likes_count')
+            ),
+                isLiked=Case(
+                    When(
+                        likes__user=user,  # Исправлено здесь
+                        then=Value(True)
+                    ),
+                    default=Value(False),
+                    output_field=models.BooleanField()
+                )
+        ).order_by('-likes_count').distinct()
     
     def question_with_id(self, id):
         try:
@@ -164,7 +186,7 @@ class QuestionManager(Manager):
         except Tag.DoesNotExist:
             return self.none()
         
-        return self.filter(tags=tag)
+        return self.filter(tags=tag).distinct()
     
 
     
@@ -216,7 +238,7 @@ class AnswerManager(Manager):
                     output_field=models.BooleanField()
                 )
         )
-    # Profile.objects.get_avatar_url(user=answers[0].author)
+    
 class Answer(models.Model):
     objects = AnswerManager()
     question = models.ForeignKey('Question', on_delete=models.CASCADE, related_name='answers', blank=True, null=True)
