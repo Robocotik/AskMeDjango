@@ -5,7 +5,7 @@
     {% include "layouts/card_layout.html" with id=item.id likes_count=likes_count title=item.title desc=item.desc answer_count=item.answer_count tags=item.tags.all is_liked=is_liked author_avatar=avatar %}
     <div class='flex flex-col gap-4 w-full'>
         {% for data in answers %}
-        {% include "layouts/card_answer_layout.html" with id=data.id likes_count=data.likes_count answer=data.content%}
+        {% include "layouts/card_answer_layout.html" with id=data.id likes_count=data.likes_count answer=data.content avatar=data.avatar_url %}
         {% endfor %}
     </div>
     <form method='post' action="" class='flex flex-col items-start'>

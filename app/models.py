@@ -5,6 +5,10 @@ from django.db.models import Count
 from django.db.models import Prefetch
 from django.core.exceptions import ObjectDoesNotExist
 
+from askme_startkin.settings import MEDIA_URL
+from django.db.models import Case, When, Value, CharField, F
+from django.db.models.functions import Concat
+
 
 class Avatar(models.Model):
     image = models.ImageField(upload_to='uploads/', null=True, blank=True)
@@ -46,27 +50,69 @@ class QuestionManager(Manager):
         return self.prefetch_related(
             'tags',
             'likes'
+        ).select_related(
+            'author__profile__avatar'
         ).annotate(
             answer_count=Count('answers', distinct=True),
-            likes_count=Count('likes', distinct=True)
+            likes_count=Count('likes', distinct=True),
+            avatar_url=Case(
+                When(
+                    author__profile__avatar__isnull=False,
+                    then=Concat(
+                        Value('/' + MEDIA_URL),
+                        F('author__profile__avatar__image'),
+                        output_field=CharField()
+                    )
+                ),
+                default=Value('/static/empty_avatar.jpg'),
+                output_field=CharField()
+            )
         )
     
     def new_questions(self):
         return self.prefetch_related(
             'tags',
             'likes'
+        ).select_related(
+            'author__profile__avatar'
         ).annotate(
             answer_count=Count('answers', distinct=True),
-            likes_count=Count('likes', distinct=True)
+            likes_count=Count('likes', distinct=True),
+            avatar_url=Case(
+                When(
+                    author__profile__avatar__isnull=False,
+                    then=Concat(
+                        Value('/' + MEDIA_URL),
+                        F('author__profile__avatar__image'),
+                        output_field=CharField()
+                    )
+                ),
+                default=Value('/static/empty_avatar.jpg'),
+                output_field=CharField()
+            )
         ).order_by('-created_at')
     
     def best_questions(self):
         return self.prefetch_related(
             'tags',
             'likes'
+        ).select_related(
+            'author__profile__avatar'
         ).annotate(
             answer_count=Count('answers', distinct=True),
-            likes_count=Count('likes', distinct=True)
+            likes_count=Count('likes', distinct=True),
+            avatar_url=Case(
+                When(
+                    author__profile__avatar__isnull=False,
+                    then=Concat(
+                        Value('/' + MEDIA_URL),
+                        F('author__profile__avatar__image'),
+                        output_field=CharField()
+                    )
+                ),
+                default=Value('/static/empty_avatar.jpg'),
+                output_field=CharField()
+            )
         ).order_by('-likes_count')
     
     def question_with_id(self, id):
@@ -84,7 +130,20 @@ class QuestionManager(Manager):
     
         
     def questions_with_tag(self, tag_title):
-        self = self.annotate(answer_count=Count('answers'), likes_count=Count('likes'))
+        self = self.select_related(
+            'author__profile__avatar'
+            ).annotate(answer_count=Count('answers'), likes_count=Count('likes'), avatar_url=Case(
+                When(
+                    author__profile__avatar__isnull=False,
+                    then=Concat(
+                        Value('/' + MEDIA_URL),
+                        F('author__profile__avatar__image'),
+                        output_field=CharField()
+                    )
+                ),
+                default=Value('/static/empty_avatar.jpg'),
+                output_field=CharField()
+            ))
         try:
             tag = Tag.objects.get(title=tag_title)
         except Tag.DoesNotExist:
@@ -114,7 +173,29 @@ class Tag(models.Model):
         return self.title
     
 
+class AnswerManager(Manager):
+    def all_with_avatars(self, question):
+
+        return self.filter(question=question).select_related(
+            'author__profile__avatar'
+        ).annotate(
+            likes_count=Count('answer_likes'),
+            avatar_url=Case(
+                When(
+                    author__profile__avatar__isnull=False,
+                    then=Concat(
+                        Value('/' + MEDIA_URL),
+                        F('author__profile__avatar__image'),
+                        output_field=CharField()
+                    )
+                ),
+                default=Value('/static/empty_avatar.jpg'),
+                output_field=CharField()
+            )
+        )
+    # Profile.objects.get_avatar_url(user=answers[0].author)
 class Answer(models.Model):
+    objects = AnswerManager()
     question = models.ForeignKey('Question', on_delete=models.CASCADE, related_name='answers', blank=True, null=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     content = models.CharField(max_length=1000)

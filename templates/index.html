@@ -6,6 +6,6 @@
 
 {% endblock header %} {% block content %}
 <div class="flex flex-col gap-4 w-full items-center bg-red-400">
-  {% for item in items %} {% include "layouts/card_layout.html" with id=item.id image_url=item.image_url likes_count=item.likes.count title=item.title desc=item.desc answer_count=item.answer_count tags=item.tags.all is_liked=item.is_liked %} {% endfor %}
+  {% for item in items %} {% include "layouts/card_layout.html" with id=item.id image_url=item.image_url likes_count=item.likes.count title=item.title desc=item.desc answer_count=item.answer_count tags=item.tags.all is_liked=item.is_liked author_avatar=item.avatar_url %} {% endfor %}
 </div>
 {% endblock content %} {% block pagination %} {% include "layouts/pagination.html" %} {% endblock pagination %}

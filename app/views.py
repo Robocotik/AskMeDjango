@@ -112,8 +112,8 @@ def ask(request):
 
 def single_question(request, question_id):
     question = Question.objects.question_with_id(question_id)
-    answers = paginate(question.answers.all(), request)
-    
+    print(Answer.objects.all_with_avatars(question=question).count())
+    answers = paginate(Answer.objects.all_with_avatars(question=question), request)
     avatar = Profile.objects.get_avatar_url(user=question.author)
     
     is_liked = QuestionLike.objects.filter(question=question, user=request.user).exists()
