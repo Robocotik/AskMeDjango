@@ -137,6 +137,8 @@ STATIC_URL = 'static/'
 
 STATIC_ROOT = BASE_DIR / 'static/'
 
+DEFAULT_AVATAR_URL = 'empty_avatar.jpg' 
+
 # if DEBUG:
 #     STATICFILES_DIRS = [
 #         BASE_DIR / "static",

@@ -5,6 +5,7 @@ from django.db.models import Count
 from django.db.models import Prefetch
 from django.core.exceptions import ObjectDoesNotExist
 
+from askme_startkin import settings
 from askme_startkin.settings import MEDIA_URL
 from django.db.models import Case, When, Value, CharField, F
 from django.db.models.functions import Concat
@@ -13,6 +14,12 @@ from django.db.models.functions import Concat
 class Avatar(models.Model):
     image = models.ImageField(upload_to='uploads/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def image_url(self):
+        if self.image:
+            return self.image.url
+        return f"{settings.STATIC_URL}{settings.DEFAULT_AVATAR_URL}"
 
 class ProfileManager(Manager):
     def profile_with_id(self, id):
@@ -25,11 +32,11 @@ class ProfileManager(Manager):
     def get_avatar_url(self, user):
         try:
             profile = Profile.objects.get(user=user)
-            if profile.avatar and profile.avatar.image:
-                return profile.avatar.image.url
+            if profile.avatar:
+                return profile.avatar.image_url  # Используем новый метод
         except (AttributeError, Profile.DoesNotExist):
             pass
-        return '/static/empty_avatar.jpg'
+        return f"{settings.STATIC_URL}{settings.DEFAULT_AVATAR_URL}"
         
 class Profile(models.Model):
     objects = ProfileManager()
@@ -192,9 +199,16 @@ class QuestionManager(Manager):
     
 class Question(models.Model):
     id = models.BigAutoField(primary_key=True, editable=False)
+    correct_answer = models.ForeignKey(
+        'Answer', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name='correct_for_questions'
+    )
     objects = QuestionManager()
     title = models.CharField(max_length=1000, default='title_placeholder')
-    desc  = models.CharField(max_length=20000, default='desc_placeholder')
+    desc  = models.CharField(max_length=20000, default='desc_placeholder') 
     author = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     tags = models.ManyToManyField('Tag', related_name='questions')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -236,7 +250,23 @@ class AnswerManager(Manager):
                     ),
                     default=Value(False),
                     output_field=models.BooleanField()
-                )
+                ),
+            isDisabled=Case(
+                When(
+                    question__author__id=user.id,
+                    then=Value(False)
+                ),
+                default=Value(True),
+                output_field=models.BooleanField()
+            ),
+            isChecked=Case(
+                When(
+                    id=F('question__correct_answer__id'),  # Исправлено здесь
+                    then=Value(True)
+                ),
+                default=Value(False),
+                output_field=models.BooleanField()
+            )
         )
     
 class Answer(models.Model):

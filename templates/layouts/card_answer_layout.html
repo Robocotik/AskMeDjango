@@ -4,7 +4,7 @@
     <img src="{{avatar}}" alt="question" class="object-cover object-center rounded-md overflow-hidden" />
     <div class="flex gap-2 h-10 items-center">
       <button data-answer-image-id="{{id}}" class="h-full hover:shadow p-2 rounded-xl overflow-hidden border border-1 border-gray-200">
-        <svg width="auto"  height="100%" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <svg width="auto" height="100%" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
           <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
           <g id="SVGRepo_iconCarrier">
@@ -25,11 +25,10 @@
     <div class="flex flex-col gap-2 w-full">
       <p class="max-h-16">{{answer}}</p>
     </div>
-    {% if hasCheckBtn %}
+
     <div class="flex w-full gap-2 items-center">
-      <input type="checkbox" name="cheese" id="cheese" checked="{{isChecked}}" />
+      <input {% if isDisabled %}disabled{% endif %} type="checkbox" name="cheese" id="cheese" {% if isChecked %}checked{% endif %} />
       <label for="cheese">Correct</label>
     </div>
-    {% endif %}
   </div>
 </div>
