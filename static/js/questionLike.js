@@ -16,8 +16,9 @@ function getCookie(name) {
 
 const csrftoken = getCookie('csrftoken')
 const likeButtons = document.querySelectorAll('button[data-image-id]')
-
+console.log(likeButtons)
 for (const item of likeButtons) {
+  // console.log(item)
   item.addEventListener('click', (e) => {
     const request = new Request(`/question/${item.dataset.imageId}/like/`, {
       method: 'POST',
@@ -31,10 +32,11 @@ for (const item of likeButtons) {
 
     fetch(request).then((response) => {
       response.json().then((data) => {
-        if (!data.is_liked) {
-          item.classList.remove('border-green-500')
+        const path = document.querySelector(`path[data-path-id="${item.dataset.imageId}"]`)
+        if (!data.isLiked) {
+          path.style.fill = '#0F0F0F'
         } else {
-          item.classList.add('border-green-500')
+          path.style.fill = '#00FF00'
         }
         const counter = document.querySelector(`p[data-like-counter="${item.dataset.imageId}"]`)
         counter.innerHTML = data.likes_count
@@ -61,12 +63,14 @@ for (const item of likeAnswerButtons) {
 
     fetch(request).then((response) => {
       response.json().then((data) => {
-        if (!data.is_liked) {
-          item.classList.remove('border-green-500')
+        const path = document.querySelector(`path[data-answer-path-id="${item.dataset.answerImageId}"]`)
+        if (!data.isLiked) {
+          path.style.fill = '#0F0F0F'
         } else {
-          item.classList.add('border-green-500')
+          path.style.fill = '#00FF00'
         }
         const counter = document.querySelector(`p[data-answer-like-counter="${item.dataset.answerImageId}"]`)
+        console.log(counter)
         counter.innerHTML = data.likes_count
       })
     })

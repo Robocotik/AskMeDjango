@@ -46,11 +46,8 @@ class Profile(models.Model):
 
 class QuestionManager(Manager):
     
-    def all_questions(self):
-        return self.prefetch_related(
-            'tags',
-            'likes'
-        ).select_related(
+    def all_questions(self, user=None):
+        queryset = self.select_related(
             'author__profile__avatar'
         ).annotate(
             answer_count=Count('answers', distinct=True),
@@ -68,6 +65,24 @@ class QuestionManager(Manager):
                 output_field=CharField()
             )
         )
+        
+        if user and user.is_authenticated:
+            queryset = queryset.annotate(
+                isLiked=Case(
+                    When(
+                        likes__user=user,  # Исправлено здесь
+                        then=Value(True)
+                    ),
+                    default=Value(False),
+                    output_field=models.BooleanField()
+                )
+            )
+        else:
+            queryset = queryset.annotate(
+                isLiked=Value(False, output_field=models.BooleanField())
+            )
+        
+        return queryset.prefetch_related('tags')
     
     def new_questions(self):
         return self.prefetch_related(
@@ -174,7 +189,7 @@ class Tag(models.Model):
     
 
 class AnswerManager(Manager):
-    def all_with_avatars(self, question):
+    def all_with_avatars(self, question, user=None):
 
         return self.filter(question=question).select_related(
             'author__profile__avatar'
@@ -191,7 +206,15 @@ class AnswerManager(Manager):
                 ),
                 default=Value('/static/empty_avatar.jpg'),
                 output_field=CharField()
-            )
+            ),
+            isLiked=Case(
+                    When(
+                        answer_likes__user=user,
+                        then=Value(True)
+                    ),
+                    default=Value(False),
+                    output_field=models.BooleanField()
+                )
         )
     # Profile.objects.get_avatar_url(user=answers[0].author)
 class Answer(models.Model):

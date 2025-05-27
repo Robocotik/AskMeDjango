@@ -28,7 +28,8 @@ def paginate(objects_list, request, per_page=5):
 
 @login_required(login_url=reverse_lazy('login'))
 def index(request):
-    questions = Question.objects.all_questions()
+    questions = Question.objects.all_questions(user=request.user)
+    print(questions[0].isLiked)
     page = paginate(questions, request=request)
     return render(request, 'index.html', context={"items" : page, 'page_obj': page})
 
@@ -112,18 +113,18 @@ def ask(request):
 
 def single_question(request, question_id):
     question = Question.objects.question_with_id(question_id)
-    print(Answer.objects.all_with_avatars(question=question).count())
-    answers = paginate(Answer.objects.all_with_avatars(question=question), request)
+    # print(Answer.objects.all_with_avatars(question=question, user=request.user).count())
+    answers = paginate(Answer.objects.all_with_avatars(question=question, user=request.user), request)
     avatar = Profile.objects.get_avatar_url(user=question.author)
     
-    is_liked = QuestionLike.objects.filter(question=question, user=request.user).exists()
+    isLiked = QuestionLike.objects.filter(question=question, user=request.user).exists()
     form = AnswerForm()
     if request.method == 'POST':
         form = AnswerForm(request.POST)
         if form.is_valid():
             form.save(user=request.user, question_id=question_id)
             return redirect(reverse_lazy('question', kwargs={'question_id': question.id}))
-    return render(request, 'single_question.html', context={"item": question, "answers" :answers, 'page_obj': answers, 'form': form, 'is_liked': is_liked, 'likes_count': question.likes.count(), 'avatar': avatar, 'hasCheckBtn': request.user.id != question.author.id})
+    return render(request, 'single_question.html', context={"item": question, "answers" :answers, 'page_obj': answers, 'form': form, 'isLiked': isLiked, 'likes_count': question.likes.count(), 'avatar': avatar, 'hasCheckBtn': request.user.id != question.author.id})
 
 def tag_id(request, tag):
     questions = Question.objects.questions_with_tag(tag)
@@ -141,7 +142,7 @@ def likeQuestion(request, question_id):
         questionLike, is_created = QuestionLike.objects.get_or_create(user=request.user, question=question) 
         if not is_created:
             questionLike.delete()
-    return JsonResponse({'likes_count': QuestionLike.objects.filter(question=question).count(), 'is_liked': is_created})
+    return JsonResponse({'likes_count': QuestionLike.objects.filter(question=question).count(), 'isLiked': is_created})
 
 
 
@@ -153,4 +154,4 @@ def likeAnswer(request, answer_id):
         answerLike, is_created = AnswerLike.objects.get_or_create(user=request.user, answer=answer) 
         if not is_created:
             answerLike.delete()
-    return JsonResponse({'likes_count': AnswerLike.objects.filter(answer=answer).count(), 'is_liked': is_created})
+    return JsonResponse({'likes_count': AnswerLike.objects.filter(answer=answer).count(), 'isLiked': is_created})
