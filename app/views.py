@@ -123,7 +123,7 @@ def single_question(request, question_id):
         if form.is_valid():
             form.save(user=request.user, question_id=question_id)
             return redirect(reverse_lazy('question', kwargs={'question_id': question.id}))
-    return render(request, 'single_question.html', context={"item": question, "answers" :answers, 'page_obj': answers, 'form': form, 'is_liked': is_liked, 'likes_count': question.likes.count(), 'avatar': avatar})
+    return render(request, 'single_question.html', context={"item": question, "answers" :answers, 'page_obj': answers, 'form': form, 'is_liked': is_liked, 'likes_count': question.likes.count(), 'avatar': avatar, 'hasCheckBtn': request.user.id != question.author.id})
 
 def tag_id(request, tag):
     questions = Question.objects.questions_with_tag(tag)
