@@ -1,0 +1,11 @@
+<div class="flex flex-col gap-2 w-full">
+  <h2 class="text-2xl font-semibold">Best members</h2>
+  <div class="flex flex-col gap-2">
+    {% for user in users %}
+    <div class="flex gap-2 items-center">
+      <!-- <img src="{{ user.profile.avatar.image.url }}" alt="{{ user.username }}" class="object-center object-cover rounded-md aspect-square" /> -->
+      <span>{{ user.username }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</div>

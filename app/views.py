@@ -4,7 +4,7 @@ from django.urls import reverse, reverse_lazy
 
 from app.forms import AnswerForm, AskForm, LoginForm, RegisterForm, SettingsForm
 # from static.mock.question import questions
-from .models import Answer, AnswerLike, Avatar, Question, Profile, QuestionLike
+from .models import Answer, AnswerLike, Avatar, Question, Profile, QuestionLike, Tag
 from django.core.paginator import Paginator, EmptyPage
 from django.contrib import auth
 from django.contrib.auth.decorators import login_required
@@ -190,3 +190,12 @@ def correctAnswer(request, answer_id):
         
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
+    
+
+def tag_questions(request, tag_title):
+    tag = get_object_or_404(Tag, title=tag_title)
+    questions = Question.objects.filter(tags=tag).order_by('-created_at')
+    return render(request, 'questions/tag_questions.html', {
+        'tag': tag,
+        'questions': questions
+    })

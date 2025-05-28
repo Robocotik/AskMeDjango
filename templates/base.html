@@ -116,29 +116,9 @@
                 {% if user.is_authenticated %}
 
                 <div class='flex flex-col gap-4 w-1/5'>
-                    <div class='flex flex-col gap-2 w-full'>
-                        <h2 class='text-2xl font-semibold'>
-                            Popular tags
-                        </h2>
-                        <div class='flex flex-wrap w-full gap-x-4 gap-y-2'>
-                            <a href='/tag/perl'>perl</a>
-                            <a href='/tag/python'>python</a>
-                            <a href='/tag/c++'>c++</a>
-                            <a href='/tag/go'>go</a>
-                        </div>
-                    </div>
-                    <div class='flex flex-col gap-2 w-full'>
-                        <h2 class='text-2xl font-semibold'>
-                            Best members
-                        </h2>
-                        <div class='flex flex-col gap-2'>
-                            <p>Gosha</p>
-                            <p>Bika</p>
-                            <p>Dr. black</p>
-                            <p>Maletski</p>
-                            <p>Lololowka</p>
-                        </div>
-                    </div>
+                    {% load sidebar_tags %}
+                    {% popular_tags %}
+                    {% top_users %}
                 </div>
                 {% endif %}
             </div>

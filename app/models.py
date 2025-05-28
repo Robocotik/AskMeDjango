@@ -10,6 +10,11 @@ from askme_startkin.settings import MEDIA_URL
 from django.db.models import Case, When, Value, CharField, F
 from django.db.models.functions import Concat
 
+from django.utils import timezone
+from django.core.cache import cache
+from datetime import timedelta
+from django.db.models import Q
+
 
 class Avatar(models.Model):
     image = models.ImageField(upload_to='uploads/', null=True, blank=True)
@@ -217,9 +222,21 @@ class Question(models.Model):
     def __str__(self) -> str:
         return self.title
 
+class TagManager(models.Manager):
+    def popular_tags(self):
+        cache_key = 'popular_tags'
+        tags = cache.get(cache_key)
+        if tags is None:
+            three_months_ago = timezone.now() - timedelta(minutes=1)
+            tags = self.annotate(
+                num_questions=Count('questions', filter=Q(questions__created_at__gte=three_months_ago))).order_by('-num_questions')[:10]
+            cache.set(cache_key, tags, 60) 
+        return tags
+
 class Tag(models.Model):
     title = models.CharField(max_length=255)
-
+    objects = TagManager() 
+    
     def __str__(self) -> str:
         return self.title
     
@@ -296,3 +313,31 @@ class AnswerLike(models.Model):
     user = models.ForeignKey(User, default=None, on_delete=models.CASCADE)
     class Meta:
         unique_together = ('answer', 'user')
+
+
+
+class UserManager(models.Manager):
+    def top_users(self):
+        cache_key = 'top_users'
+        users = cache.get(cache_key)
+        if users is None:
+            one_week_ago = timezone.now() - timedelta(days=7)
+            
+            # Пользователи с популярными вопросами
+            top_askers = User.objects.annotate(
+                question_score=Count('question__likes', filter=Q(question__created_at__gte=one_week_ago))
+            ).order_by('-question_score')[:5]
+            
+            # Пользователи с популярными ответами
+            top_answerers = User.objects.annotate(
+                answer_score=Count('answer__answer_likes', filter=Q(answer__created_at__gte=one_week_ago))
+            ).order_by('-answer_score')[:5]
+            
+            # Объединяем и сортируем по общей популярности
+            users = list(top_askers) + list(top_answerers)
+            users = sorted(users, key=lambda u: getattr(u, 'question_score', 0) + getattr(u, 'answer_score', 0), reverse=True)[:10]
+            
+            cache.set(cache_key, users, 60*60*12)  # Кэшируем на 12 часов
+        return users
+    
+User.add_to_class('objects', UserManager())
