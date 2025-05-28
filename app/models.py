@@ -131,12 +131,12 @@ class QuestionManager(Manager):
                     default=Value(False),
                     output_field=models.BooleanField()
                 )
-        ).order_by('-created_at').distinct()
+        ).distinct().order_by('-created_at')
     
     def best_questions(self, user=None):
-        return self.prefetch_related(
-            'tags',
-            'likes'
+    # Сначала получаем базовый queryset с аннотацией likes_count
+        queryset = self.prefetch_related(
+            'tags'
         ).select_related(
             'author__profile__avatar'
         ).annotate(
@@ -153,16 +153,32 @@ class QuestionManager(Manager):
                 ),
                 default=Value('/static/empty_avatar.jpg'),
                 output_field=CharField()
-            ),
+            )
+        ).order_by('-likes_count')
+        
+        # Затем добавляем проверку лайка отдельно, если пользователь аутентифицирован
+        if user and user.is_authenticated:
+            liked_questions = QuestionLike.objects.filter(
+                question=models.OuterRef('pk'),
+                user=user
+            ).values('question')[:1]
+            
+            queryset = queryset.annotate(
                 isLiked=Case(
                     When(
-                        likes__user=user,  # Исправлено здесь
+                        id__in=liked_questions,
                         then=Value(True)
                     ),
                     default=Value(False),
                     output_field=models.BooleanField()
                 )
-        ).order_by('-likes_count').distinct()
+            )
+        else:
+            queryset = queryset.annotate(
+                isLiked=Value(False, output_field=models.BooleanField())
+            )
+        
+        return queryset.distinct()
     
     def question_with_id(self, id):
         try:
@@ -316,28 +332,52 @@ class AnswerLike(models.Model):
 
 
 
-class UserManager(models.Manager):
+
+class UserQuerySet(models.QuerySet):
     def top_users(self):
         cache_key = 'top_users'
         users = cache.get(cache_key)
         if users is None:
-            one_week_ago = timezone.now() - timedelta(days=7)
+            one_week_ago = timezone.now() - timedelta(minutes=1)
             
-            # Пользователи с популярными вопросами
-            top_askers = User.objects.annotate(
+            users_dict = {}
+            
+            for user in self.annotate(
                 question_score=Count('question__likes', filter=Q(question__created_at__gte=one_week_ago))
-            ).order_by('-question_score')[:5]
+            ).order_by('-question_score')[:10]:
+                users_dict[user.id] = {
+                    'user': user,
+                    'total_score': getattr(user, 'question_score', 0),
+                    'question_score': getattr(user, 'question_score', 0),
+                    'answer_score': 0
+                }
             
-            # Пользователи с популярными ответами
-            top_answerers = User.objects.annotate(
+            for user in self.annotate(
                 answer_score=Count('answer__answer_likes', filter=Q(answer__created_at__gte=one_week_ago))
-            ).order_by('-answer_score')[:5]
+            ).order_by('-answer_score')[:10]:
+                if user.id in users_dict:
+                    users_dict[user.id]['total_score'] += getattr(user, 'answer_score', 0)
+                    users_dict[user.id]['answer_score'] = getattr(user, 'answer_score', 0)
+                else:
+                    users_dict[user.id] = {
+                        'user': user,
+                        'total_score': getattr(user, 'answer_score', 0),
+                        'question_score': 0,
+                        'answer_score': getattr(user, 'answer_score', 0)
+                    }
             
-            # Объединяем и сортируем по общей популярности
-            users = list(top_askers) + list(top_answerers)
-            users = sorted(users, key=lambda u: getattr(u, 'question_score', 0) + getattr(u, 'answer_score', 0), reverse=True)[:10]
+            sorted_users = sorted(users_dict.values(), key=lambda x: x['total_score'], reverse=True)[:10]
+            users = [item['user'] for item in sorted_users]
             
-            cache.set(cache_key, users, 60*60*12)  # Кэшируем на 12 часов
+            for user in users:
+                user.total_score = users_dict[user.id]['total_score']
+                user.question_score = users_dict[user.id]['question_score']
+                user.answer_score = users_dict[user.id]['answer_score']
+            
+            cache.set(cache_key, users, 60)
         return users
-    
-User.add_to_class('objects', UserManager())
+    def get_by_natural_key(self, username):
+        return self.get(username=username)
+
+# Добавляем менеджер к модели
+User.add_to_class('objects', models.Manager.from_queryset(UserQuerySet)())

@@ -32,6 +32,7 @@ def index(request):
     page = paginate(questions, request=request)
     return render(request, 'index.html', context={"items" : page, 'page_obj': page})
 
+@login_required
 def settings(request):
     profile, _ = Profile.objects.get_or_create(user=request.user)
     
@@ -60,6 +61,7 @@ def settings(request):
     
     return render(request, 'settings.html', context={"item": profile, 'form': form})
 
+@login_required
 def logout(request):
     auth.logout(request)
     next_page = request.GET.get('continue', 'login')
@@ -96,11 +98,13 @@ def signup(request):
         
     return render(request, 'register.html', context={'form': form})
 
+@login_required
 def hot(request):
     questions = Question.objects.best_questions(user=request.user)
     page = paginate(questions, request)
     return render(request, 'index.html', context={"items": page, 'page_obj': page})
 
+@login_required
 def ask(request):
     form = AskForm()
     if request.method == 'POST':
@@ -110,6 +114,7 @@ def ask(request):
             return redirect(reverse_lazy('question', kwargs={'question_id': question.id}))
     return render(request, 'ask.html', {'form': form})
 
+@login_required
 def single_question(request, question_id):
     question = Question.objects.question_with_id(question_id)
     # print(Answer.objects.all_with_avatars(question=question, user=request.user).count())
