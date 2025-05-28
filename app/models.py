@@ -14,6 +14,7 @@ from django.utils import timezone
 from django.core.cache import cache
 from datetime import timedelta
 from django.db.models import Q
+from django.contrib.auth.models import BaseUserManager
 
 
 class Avatar(models.Model):
@@ -376,8 +377,12 @@ class UserQuerySet(models.QuerySet):
             
             cache.set(cache_key, users, 60)
         return users
+
     def get_by_natural_key(self, username):
         return self.get(username=username)
 
+class UserManager(BaseUserManager.from_queryset(UserQuerySet)):
+    pass
+
 # Добавляем менеджер к модели
-User.add_to_class('objects', models.Manager.from_queryset(UserQuerySet)())
+User.add_to_class('objects', UserManager())
